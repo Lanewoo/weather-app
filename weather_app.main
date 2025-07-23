@@ -1,0 +1,56 @@
+import React, { useState, useEffect } from "react";
+import axios from "axios";
+import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+
+const API_KEY = "YOUR_OPENWEATHERMAP_API_KEY";
+
+export default function WeatherApp() {
+  const [city, setCity] = useState("Istanbul");
+  const [weather, setWeather] = useState(null);
+  const [loading, setLoading] = useState(false);
+
+  const fetchWeather = async () => {
+    setLoading(true);
+    try {
+      const response = await axios.get(
+        `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${API_KEY}&units=metric`
+      );
+      setWeather(response.data);
+    } catch (error) {
+      console.error("Error fetching weather:", error);
+      setWeather(null);
+    }
+    setLoading(false);
+  };
+
+  useEffect(() => {
+    fetchWeather();
+  }, []);
+
+  return (
+    <div className="max-w-md mx-auto mt-10 p-4">
+      <div className="flex gap-2 mb-4">
+        <Input
+          placeholder="Enter city name"
+          value={city}
+          onChange={(e) => setCity(e.target.value)}
+        />
+        <Button onClick={fetchWeather}>Search</Button>
+      </div>
+      {loading && <p>Loading...</p>}
+      {weather && (
+        <Card>
+          <CardContent className="space-y-2">
+            <h2 className="text-xl font-bold">{weather.name}</h2>
+            <p>Temperature: {weather.main.temp} °C</p>
+            <p>Weather: {weather.weather[0].description}</p>
+            <p>Humidity: {weather.main.humidity}%</p>
+            <p>Wind: {weather.wind.speed} m/s</p>
+          </CardContent>
+        </Card>
+      )}
+    </div>
+  );
+} 
